@@ -1,137 +1,258 @@
-# 🎮 AI 游戏角色生成器
+# 🎮 AI Game Character Generator
 
-> **多AI协作工作流**：口语描述 → DeepSeek Prompt优化 → Stable Diffusion 生成 → 游戏角色立绘
+> **Multi-AI Collaboration Pipeline**: Natural language → DeepSeek Prompt Optimization → Stable Diffusion → Game Character Art
 
-[![Python](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
-[![Gradio](https://img.shields.io/badge/Gradio-4.0+-orange)](https://www.gradio.app/)
+[![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
+[![Gradio](https://img.shields.io/badge/Gradio-4.0+-orange?logo=gradio)](https://www.gradio.app/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-SDXL-green)](https://github.com/comfyanonymous/ComfyUI)
+[![DeepSeek](https://img.shields.io/badge/DeepSeek-API-purple)](https://platform.deepseek.com)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-## 💡 项目动机
+---
 
-游戏公司每天需要大量角色原画，传统流程是：策划写需求 → 美术画草图 → 反复修改 → 定稿，一个角色可能需要数天。
+## 💡 Why This Project
 
-我想探索的是：**能否让AI承担"初级原画师"的工作？** 策划用口语描述 → AI自动优化Prompt → 立刻出图，30秒拿到可讨论的视觉方案。
+Game studios produce hundreds of character concepts daily. The traditional pipeline — designer writes brief → artist sketches → rounds of revision → final concept — can take **days per character**.
 
-> 这个项目的灵感来自三七互娱的"小七"AI系统——我听说他们80%的2D图像由AI生成，于是自己动手实现了一个简化版管线。
+**What if AI could serve as a "junior concept artist"?**
 
-## 🏗️ 技术架构
+This project explores exactly that: a designer types "white-haired female warrior in red robes" in plain language → DeepSeek optimizes it into a professional-grade prompt → Stable Diffusion generates the artwork → **30 seconds from idea to visual prototype**.
+
+> Inspired by 37 Interactive Entertainment's (三七互娱) "Xiao Qi" AI system, which reportedly handles **80% of their 2D asset production**. This is my micro-scale implementation of the same idea: an AI pipeline wrapped into a tool that non-technical team members can actually use.
+
+---
+
+## 🏗️ Architecture
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                  多AI协作工作流                        │
-│                                                        │
-│  用户口语输入("白发仙侠女剑客")                         │
-│         │                                              │
-│         ▼                                              │
-│  ┌─────────────┐                                       │
-│  │  DeepSeek   │ ← Prompt优化（文案能力）               │
-│  │  优化Prompt  │   口语→专业英文提示词                   │
-│  └──────┬──────┘                                       │
-│         │                                              │
-│         ▼                                              │
-│  ┌─────────────┐                                       │
-│  │ Stable      │ ← 角色生成（绘画能力）                 │
-│  │ Diffusion   │   ComfyUI本地管线 / Replicate云端备降   │
-│  │   SDXL      │                                       │
-│  └──────┬──────┘                                       │
-│         │                                              │
-│         ▼                                              │
-│  ┌─────────────┐                                       │
-│  │  输出结果    │   角色立绘 + Prompt对比 + 优化说明      │
-│  └─────────────┘                                       │
-│                                                        │
-│  我是架构师：搭管线、做调度、写界面                      │
-└──────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   MULTI-AI COLLABORATION PIPELINE            │
+│                                                              │
+│  Step 1: User Input                                          │
+│  "A white-haired xianxia swordswoman in flowing red robes"   │
+│                          │                                   │
+│                          ▼                                   │
+│  Step 2: DeepSeek API — Prompt Optimization                  │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │ Input: casual Chinese description                   │     │
+│  │ Output: professional English SD prompt              │     │
+│  │ + negative prompt + optimization rationale          │     │
+│  │                                                     │     │
+│  │ "1girl, white long hair, flowing red hanfu,         │     │
+│  │  ancient chinese fantasy, ink wash influence,       │     │
+│  │  dramatic lighting, 8k, artstation trending"        │     │
+│  └────────────────────┬───────────────────────────────┘     │
+│                       │                                      │
+│                       ▼                                      │
+│  Step 3: ComfyUI Pipeline — Image Generation                 │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │ Checkpoint Load ──► CLIP Text Encode (+/-)          │     │
+│  │       │                    │                        │     │
+│  │       └────────┬───────────┘                        │     │
+│  │                ▼                                    │     │
+│  │           KSampler (25 steps, Euler Ancestral)       │     │
+│  │                │                                    │     │
+│  │                ▼                                    │     │
+│  │          VAE Decode ──► Save Image                   │     │
+│  │                                                     │     │
+│  │  Hardware: RTX 4060 Laptop GPU (8GB VRAM)            │     │
+│  │  Model: SDXL 1.0 Base (6.5GB)                       │     │
+│  │  Resolution: 1024×1024                              │     │
+│  │  Generation time: ~15 seconds per image              │     │
+│  └────────────────────┬───────────────────────────────┘     │
+│                       │                                      │
+│                       ▼                                      │
+│  Step 4: Output                                              │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │ • Generated character art                           │     │
+│  │ • Original vs optimized prompt comparison           │     │
+│  │ • DeepSeek's optimization explanation               │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                              │
+│  My Role: Pipeline Architect — I design the workflow,        │
+│  connect the models, and build the interface.                │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## 🎨 支持的游戏风格
+### Why Multi-AI?
 
-| 风格 | 说明 | 适用场景 |
-|------|------|----------|
-| 🏔️ 仙侠国风 | 水墨飘逸、古典建筑 | MMORPG、卡牌 |
-| 🤖 科幻赛博 | 霓虹、机甲、未来都市 | 射击、MOBA |
-| 🎌 二次元动漫 | 赛璐珞、日系美学 | 二次元卡牌 |
-| 🖤 暗黑魔幻 | 哥特、魂系、重甲 | ARPG、魂Like |
-| 🧸 Q版可爱 | 大头小身、明亮色彩 | 休闲放置 |
-| 🎬 写实电影级 | UE5级画质、8K | 次世代3A |
+Each model has a specialty:
+- **DeepSeek** → Language understanding, prompt engineering (text domain)
+- **Stable Diffusion** → Visual generation, artistic rendering (image domain)
+- **Me** → Architecture design, pipeline orchestration, UI/UX
 
-## 🚀 快速开始
+This is the same division of labor as a game studio: designer + artist + technical director.
 
-### 环境要求
-- Python 3.10+
-- NVIDIA GPU + 8GB+ VRAM（本地模式）
-- 或 Replicate API Token（云端模式，无需GPU）
+---
 
-### 1. 克隆项目
+## 🎨 Style Presets
+
+| Style | Description | Game Types |
+|-------|-------------|------------|
+| **仙侠国风** (Chinese Fantasy) | Ink wash influence, flowing silk, ancient architecture | MMORPG, Card Games |
+| **科幻赛博** (Cyberpunk) | Neon lights, holographic UI, high-tech armor | FPS, MOBA |
+| **二次元动漫** (Anime) | Cel shading, clean lineart, vibrant colors | Gacha, Visual Novel |
+| **暗黑魔幻** (Dark Fantasy) | Gothic atmosphere, heavy armor, dramatic shadows | ARPG, Souls-like |
+| **Q版可爱** (Chibi) | Big head, small body, bright pastels | Casual, Idle Games |
+| **写实电影级** (Cinematic) | Photorealistic, UE5-quality, 8K detail | AAA, Next-gen |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| Python | 3.10+ | 3.13 |
+| GPU VRAM | 6 GB | 8 GB+ |
+| Disk Space | ~15 GB | 30 GB+ |
+| OS | Windows / Linux / macOS | Windows 11 |
+
+### 1. Clone & Install
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-game-character-generator.git
+git clone https://github.com/yao-933/ai-game-character-generator.git
 cd ai-game-character-generator
 pip install -r requirements.txt
 ```
 
-### 2. 配置 API 密钥
-```bash
-# 注册 DeepSeek API：https://platform.deepseek.com
-set DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxx
+### 2. Configure API Keys
 
-# （可选）注册 Replicate：https://replicate.com
-set REPLICATE_API_TOKEN=r8_xxxxxxxxxxxxx
+```bash
+# Option A: Environment variable (recommended)
+# Windows
+set DEEPSEEK_API_KEY=sk-your-key-here
+# Linux/macOS
+export DEEPSEEK_API_KEY=sk-your-key-here
+
+# Option B: Create .env file in project root
+echo "DEEPSEEK_API_KEY=sk-your-key-here" > .env
 ```
 
-### 3. 启动本地 ComfyUI（推荐）
+Get your key at [platform.deepseek.com](https://platform.deepseek.com)
+
+### 3. Start ComfyUI (Local Backend)
+
 ```bash
-cd D:\ComfyUI
+# Clone and set up ComfyUI (one-time setup)
+git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+pip install -r requirements.txt
+
+# Download SDXL model to models/checkpoints/
+# huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+# → sd_xl_base_1.0.safetensors (6.94 GB)
+
+# Start the server
 python main.py
-# 浏览器打开 http://127.0.0.1:8188 确认启动
+# → http://127.0.0.1:8188
 ```
 
-### 4. 启动角色生成器
+### 4. Launch the Generator
+
 ```bash
+cd ai-game-character-generator
 python app.py
-# 浏览器打开 http://127.0.0.1:7860
+# → http://127.0.0.1:7860
 ```
 
-## 📸 效果展示
+### Cloud-Only Mode (No GPU Required)
 
-*（运行 `python app.py` 并生成后，截图放在 examples/ 目录）*
-
-## 🛠️ 技术栈
-
-- **Prompt优化**：DeepSeek API（`deepseek-chat`）
-- **图像生成**：ComfyUI + SDXL 1.0（本地）/ Replicate API（云端）
-- **Web界面**：Gradio
-- **降级策略**：ComfyUI不可用时自动切换Replicate；DeepSeek不可用时使用本地模板
-
-## 📂 项目结构
-
-```
-ai-game-character-generator/
-├── app.py                 # Gradio 主界面
-├── config.py              # API密钥和配置
-├── prompt_optimizer.py    # DeepSeek Prompt优化模块
-├── image_generator.py     # SD图像生成模块（双后端）
-├── style_presets.py       # 6种游戏美术风格预设
-├── requirements.txt       # 依赖
-├── README.md              # 本文件
-├── outputs/               # 生成的图像
-└── examples/              # 展示截图
-```
-
-## 🔮 后续计划
-
-- [ ] 接入 ControlNet 实现姿态控制
-- [ ] 支持角色三视图（正面/侧面/背面）
-- [ ] 批量生成 + 风格一致性检测
-- [ ] 接入 ComfyUI 视频工作流 → AI视频分镜工具
-
-## 👤 关于我
-
-无锡太湖学院 物联网工程 大三学生
-
-对 AI + 游戏 + 美术的交叉领域充满热情。这个项目是我"多AI协作"思路的实践——我认为未来的游戏开发不是AI取代人，而是人指挥多个AI协作。
-
-目前正在寻找 **AI方向的游戏公司实习机会**，特别对三七互娱的"小七"AI系统感兴趣。
+Set `IMAGE_GEN_MODE = "replicate"` in `config.py` and add your [Replicate](https://replicate.com) API token. Falls back automatically when ComfyUI is unavailable.
 
 ---
 
-*Built with ❤️ and AI collaboration (DeepSeek + Claude Code + Stable Diffusion)*
+## 📂 Project Structure
+
+```
+ai-game-character-generator/
+│
+├── app.py                  # Gradio web interface (main entry)
+├── config.py               # API keys, ComfyUI URL, output settings
+├── prompt_optimizer.py     # DeepSeek: casual text → professional prompt
+├── image_generator.py      # SD image gen (ComfyUI local + Replicate cloud)
+├── style_presets.py        # 6 game art styles with prompt templates
+├── requirements.txt        # Python dependencies
+│
+├── .env                    # Local API keys (gitignored)
+├── .gitignore              # Excludes .env, outputs, __pycache__
+├── README.md               # This file
+├── LICENSE                 # MIT
+│
+├── outputs/                # Generated images (gitignored)
+└── examples/               # Screenshots for documentation
+```
+
+---
+
+## 🔧 Technical Details
+
+### ComfyUI Pipeline
+
+```
+CheckpointLoaderSimple (SDXL 1.0)
+        │
+        ├──► CLIP Text Encode (+) ──┐
+        │                            │
+        ├──► CLIP Text Encode (-) ──┤
+        │                            ▼
+        └──► EmptyLatentImage ──► KSampler ──► VAE Decode ──► SaveImage
+                                 (25 steps,    (decode latent
+                                  Euler A)      to pixels)
+```
+
+### Fallback Strategy
+
+| Component | Primary | Fallback | Trigger |
+|-----------|---------|----------|---------|
+| Prompt Optimization | DeepSeek API | Local template | API timeout |
+| Image Generation | ComfyUI (local) | Replicate (cloud) | ComfyUI unreachable |
+| Configuration | `.env` file | Environment variables | `.env` absent |
+
+### Key Design Decisions
+
+1. **ComfyUI over Diffusers**: Node-based workflows are more transparent and debuggable
+2. **Gradio over FastAPI+React**: Faster prototyping, less boilerplate for demo tools
+3. **Style presets with prompt suffixes**: Ensures brand consistency across generations
+4. **JSON response format from DeepSeek**: Structured output avoids regex parsing
+
+---
+
+## 🎯 Interview Demo Flow
+
+1. Open http://127.0.0.1:7860
+2. Type: `"一个白发的仙侠女剑客，穿飘逸红袍，站在山巅"`
+3. Select style: `仙侠国风`
+4. Click `生成角色`
+5. **30 seconds later**: Character art + prompt comparison on screen
+
+**Talking points:**
+- "This is multi-AI collaboration — each model does what it's best at"
+- "I deployed the full ComfyUI pipeline locally on an RTX 4060 — 8GB VRAM, 15s per image"
+- "The 6 style presets cover mainstream game genres — showing I understand the industry"
+
+---
+
+## 🔮 Roadmap
+
+- [ ] ControlNet integration for pose/sketch control
+- [ ] Character turnaround views (front / side / back)
+- [ ] Batch generation with style consistency checks
+- [ ] LoRA support for custom character styles
+
+---
+
+## 👤 Author
+
+**Yao Chengqi (姚成骐)** — Junior, IoT Engineering, Wuxi Taihu University
+
+Passionate about the intersection of AI × Gaming × Art. This project demonstrates my approach to AI tooling: not just using AI, but orchestrating multiple AIs in a production pipeline.
+
+Currently seeking **AI-focused internships in the gaming industry**.
+
+- GitHub: [github.com/yao-933](https://github.com/yao-933)
+
+---
+
+*Built with DeepSeek + Claude Code + ComfyUI + Stable Diffusion*
