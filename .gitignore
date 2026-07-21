@@ -1,0 +1,22 @@
+# 敏感配置 — 不要提交到 GitHub！
+.env
+config_local.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 生成的文件
+outputs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
