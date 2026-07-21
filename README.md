@@ -219,21 +219,6 @@ CheckpointLoaderSimple (SDXL 1.0)
 
 ---
 
-## 🎯 Interview Demo Flow
-
-1. Open http://127.0.0.1:7860
-2. Type: `"一个白发的仙侠女剑客，穿飘逸红袍，站在山巅"`
-3. Select style: `仙侠国风`
-4. Click `生成角色`
-5. **30 seconds later**: Character art + prompt comparison on screen
-
-**Talking points:**
-- "This is multi-AI collaboration — each model does what it's best at"
-- "I deployed the full ComfyUI pipeline locally on an RTX 4060 — 8GB VRAM, 15s per image"
-- "The 6 style presets cover mainstream game genres — showing I understand the industry"
-
----
-
 ## 🔮 Roadmap
 
 - [ ] ControlNet integration for pose/sketch control
@@ -242,16 +227,6 @@ CheckpointLoaderSimple (SDXL 1.0)
 - [ ] LoRA support for custom character styles
 
 ---
-
-## 👤 Author
-
-**Yao Chengqi (姚成骐)** — Junior, IoT Engineering, Wuxi Taihu University
-
-Passionate about the intersection of AI × Gaming × Art. This project demonstrates my approach to AI tooling: not just using AI, but orchestrating multiple AIs in a production pipeline.
-
-Currently seeking **AI-focused internships in the gaming industry**.
-
-- GitHub: [github.com/yao-933](https://github.com/yao-933)
 
 ---
 
